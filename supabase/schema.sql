@@ -107,3 +107,33 @@ grant select on public.affiliate_clicks_by_product to authenticated;
 -- After creating the first user under Supabase Authentication > Users, run:
 -- insert into public.admin_users(user_id, role)
 -- values ('PASTE-AUTH-USER-UUID-HERE', 'admin');
+
+
+-- Product image uploads: run this section after enabling Supabase Storage.
+-- The bucket is public so product thumbnails can be displayed on the storefront.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('product-images', 'product-images', true, 5242880, array['image/jpeg','image/png','image/webp','image/gif'])
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "Public can view product images" on storage.objects;
+create policy "Public can view product images" on storage.objects
+for select to public using (bucket_id = 'product-images');
+
+drop policy if exists "Editors can upload product images" on storage.objects;
+create policy "Editors can upload product images" on storage.objects
+for insert to authenticated
+with check (bucket_id = 'product-images' and public.current_admin_role() in ('admin','editor'));
+
+drop policy if exists "Editors can update product images" on storage.objects;
+create policy "Editors can update product images" on storage.objects
+for update to authenticated
+using (bucket_id = 'product-images' and public.current_admin_role() in ('admin','editor'))
+with check (bucket_id = 'product-images' and public.current_admin_role() in ('admin','editor'));
+
+drop policy if exists "Admins can delete product images" on storage.objects;
+create policy "Admins can delete product images" on storage.objects
+for delete to authenticated
+using (bucket_id = 'product-images' and public.current_admin_role() = 'admin');

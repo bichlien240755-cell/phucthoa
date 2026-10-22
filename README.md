@@ -79,3 +79,11 @@ Mở http://localhost:3000. Trang `/admin` để đăng nhập.
 - [ ] Kiểm tra link ảnh công khai, giá và mô tả.
 - [ ] Kiểm tra chính sách affiliate và thông tin liên hệ của chủ website.
 - [ ] Test mobile, CTA, click tracking, import file và RLS.
+
+## Sửa sản phẩm và tải ảnh minh họa
+
+Trang `/admin` có nút **Sửa** ở mỗi dòng sản phẩm. Tại đây, admin/editor có thể cập nhật tên, slug, mô tả, danh mục, giá, trạng thái hiển thị, link Shopee Affiliate, link TikTok Shop Affiliate và ảnh sản phẩm.
+
+Để tải ảnh trực tiếp từ thiết bị, chạy phần SQL cuối `supabase/schema.sql` trong Supabase SQL Editor. Phần này tạo bucket Storage công khai `product-images` (giới hạn 5 MB, chỉ nhận JPEG/PNG/WebP/GIF) và các policy: khách truy cập chỉ đọc ảnh; admin/editor được tải lên/cập nhật; admin được xóa. Không đưa `service_role` key vào biến môi trường public hoặc code trình duyệt.
+
+Lưu ý: mỗi sản phẩm vẫn cần ít nhất một link affiliate hợp lệ theo constraint `products_at_least_one_link`. Chỉ sử dụng link affiliate thật được cấp từ nền tảng.
